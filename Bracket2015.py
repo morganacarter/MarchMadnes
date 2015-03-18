@@ -269,9 +269,82 @@ for i in range(0, len(final_four), 2):
         print final_four[i + 1][0]+"-lower seed wins!"+ str(difference)
 print Regional_winner
 
-#South Bracket Selections
+#South Bracket Selections. This region is a mess.
 #South Bracket Setup. Pulls data from stats dataframe, left joins to South teams
+south_df = pd.DataFrame(South, columns=["Team"])
+south_df = pd.DataFrame(south_df.merge(full_lista_offense,on='Team', how='left'))
+south_df["AvePPGAgainst"]=south_df["AvePPGAgainst"].fillna(value=60.9)
+south_df["AvePPG"]=south_df["AvePPG"].fillna(value=73.2)
+south_df["RPI"]=south_df["RPI"].fillna(value=.5900)
+
+south = [tuple(x) for x in south_df.values]
+
 #Advances to Round of 32. 
+sweet_sixteen = []
+for i in range(0, len(south), 2):
+    difference = (float(south[i][2])-float(south[i + 1][2]) )+(float(south[i+1][4])-float(south[i][4])) + (float(south[i][6])-float(south[i + 1][6]))
+    if float(south[i][2])-float(south[i + 1][2]) +float(south[i+1][4])-float(south[i][4]) +float(south[i][6])-float(south[i + 1][6]) >0:
+        sweet_sixteen.append(south[i])
+        print south[i][0] + "-higher seed wins!"+ str(difference) 
+    else:
+        sweet_sixteen.append(south[i+1])
+        print south[i + 1][0]+"-lower seed wins!"+ str(difference)
+print sweet_sixteen
+
 #Advances to Sweet Sixteen
+elite_eight=[]
+for i in range(0, len(sweet_sixteen), 2):
+    difference = (float(sweet_sixteen[i][2])-float(sweet_sixteen[i + 1][2]) )+(float(sweet_sixteen[i+1][4])-float(sweet_sixteen[i][4])) + (float(sweet_sixteen[i][6])-float(sweet_sixteen[i + 1][6]))
+    if float(sweet_sixteen[i][2])-float(sweet_sixteen[i + 1][2]) +float(sweet_sixteen[i+1][4])-float(sweet_sixteen[i][4]) +float(sweet_sixteen[i][6])-float(sweet_sixteen[i + 1][6]) >0:
+        elite_eight.append(sweet_sixteen[i])
+        print sweet_sixteen[i][0] + "-higher seed wins!" + str(difference)
+    else:
+        elite_eight.append(sweet_sixteen[i+1])
+        print sweet_sixteen[i + 1][0]+"-lower seed wins!"+ str(difference)
+print elite_eight
+
 #Advances to Elite Eight
+final_four=[]
+for i in range(0, len(elite_eight), 2):
+    difference = (float(elite_eight[i][2])-float(elite_eight[i + 1][2]) )+(float(elite_eight[i+1][4])-float(elite_eight[i][4])) + (float(elite_eight[i][6])-float(elite_eight[i + 1][6]))
+    if float(elite_eight[i][2])-float(elite_eight[i + 1][2]) +float(elite_eight[i+1][4])-float(elite_eight[i][4]) +float(elite_eight[i][6])-float(elite_eight[i + 1][6]) >0:
+        final_four.append(elite_eight[i])
+        print elite_eight[i][0] + "-higher seed wins!"+ str(difference)
+    else:
+        final_four.append(elite_eight[i+1])
+        print elite_eight[i + 1][0]+"-lower seed wins!"+ str(difference)
+print final_four
+
 #Advances to #Advances as Regional Winner to Final Four
+for i in range(0, len(final_four), 2):
+    difference = (float(final_four[i][2])-float(final_four[i + 1][2]) )+(float(final_four[i+1][4])-float(final_four[i][4])) + (float(final_four[i][6])-float(final_four[i + 1][6]))
+    if float(final_four[i][2])-float(final_four[i + 1][2]) +float(final_four[i+1][4])-float(final_four[i][4]) +float(final_four[i][6])-float(final_four[i + 1][6]) >0:
+        Regional_winner.append(final_four[i])
+        print final_four[i][0] + "-higher seed wins!"+ str(difference)
+    else:
+        Regional_winner.append(final_four[i+1])
+        print final_four[i + 1][0]+"-lower seed wins!"+ str(difference)
+
+
+#Final Four
+Finals=[]
+for i in range(0, len(Regional_winner), 2):
+    difference = (float(Regional_winner[i][2])-float(Regional_winner[i + 1][2]) )+(float(Regional_winner[i+1][4])-float(Regional_winner[i][4])) + (float(Regional_winner[i][6])-float(Regional_winner[i + 1][6]))
+    if float(Regional_winner[i][2])-float(Regional_winner[i + 1][2]) +float(Regional_winner[i+1][4])-float(Regional_winner[i][4]) +float(Regional_winner[i][6])-float(Regional_winner[i + 1][6]) >0:
+        Finals.append(Regional_winner[i])
+        print Regional_winner[i][0] + "-higher seed wins!"+ str(difference)
+    else:
+        Finals.append(Regional_winner[i+1])
+        print Regional_winner[i + 1][0]+"-lower seed wins!"+ str(difference)
+
+print Regional_winner
+
+#Finals
+for i in range(0, len(Finals), 2):
+    difference = (float(Finals[i][2])-float(Finals[i + 1][2]) )+(float(Finals[i+1][4])-float(Finals[i][4])) + (float(Finals[i][6])-float(Finals[i + 1][6]))
+    if float(Finals[i][2])-float(Finals[i + 1][2]) +float(Finals[i+1][4])-float(Finals[i][4]) +float(Finals[i][6])-float(Finals[i + 1][6]) >0:
+        print Finals[i][0] + "-higher seed wins!"+ str(difference)
+    else:
+       
+        print Finals[i + 1][0]+"-lower seed wins!"+ str(difference)
+print Finals
