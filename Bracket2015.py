@@ -1,18 +1,17 @@
+#Libraries. Bring them in!
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-#function to loop through and collect offensive and defensive scoring stats
+#Function to loop through and collect offensive and defensive scoring stats. Pulling from NCAA information using Beautiful Soup
 offense = []
 defense = []
-def team_offense_function():
-  
 
+
+def team_offense_function():
     for i in range(1,6):
         base_offense_url = "http://www.ncaa.com/stats/basketball-men/d1/current/team/145/p"
-        #print base_offense_url+str(i)
         offense_request = requests.get(base_offense_url+str(i))
-        #print offense_request
         offense_soup = BeautifulSoup(offense_request.text)
         offense_soup_text = offense_soup.tbody.get_text(",")
         offense_soup_text = str(offense_soup_text)
@@ -33,23 +32,19 @@ def team_offense_function():
             defense.append([row])
 team_offense_function()
 
-#using pandas to data munge offense stats
+#Using pandas to data munge offense stats
 
 team_offense_df = pd.DataFrame(offense,columns=["generic"])
 lista_offense = [item.split(',') for item in team_offense_df["generic"]]
 lista_offense_df = pd.DataFrame(lista_offense,columns=["a","rank_off","Team","GamesPlayed","PointsFor","AvePPG","g","h"])
-lista_offense_df = lista_offense_df.drop(lista_offense_df.columns[[0, 6, 7]], axis=1) 
-lista_offense_df = lista_offense_df.drop(lista_offense_df.columns[[2, 3]], axis=1) 
+lista_offense_df = lista_offense_df.drop(lista_offense_df.columns[[0, 2, 3, 6, 7]], axis=1) 
 lista_offense_df = lista_offense_df.fillna(lista_offense_df.mean())
 
 #using pandas to data munge defense stats
 team_defense_df = pd.DataFrame(defense,columns=["generic"])
 lista_defense = [item.split(',') for item in team_defense_df["generic"]]
 lista_defense_df = pd.DataFrame(lista_defense,columns=["a","rank_def","Team","GamesPlayed","PointsAgainst","AvePPGAgainst","g","h"])
-lista_defense_df = lista_defense_df.drop(lista_defense_df.columns[[0, 6, 7]], axis=1) 
-lista_defense_df = lista_defense_df.drop(lista_defense_df.columns[[2, 3]], axis=1)
-
-lista_defense_df.fillna(0, inplace=True)
+lista_defense_df = lista_defense_df.drop(lista_defense_df.columns[[0,2,3, 6, 7]], axis=1) 
 
 #merging offense and defense stats together, into the offense table and handling null values
 full_lista_offense=pd.DataFrame(lista_offense_df.merge(lista_defense_df, on='Team', how='outer')).dropna(how="all")
