@@ -1,8 +1,9 @@
+#Libraries. Bring them in!
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-
+#Function to loop through and collect offensive and defensive scoring stats. Pulling from NCAA information using Beautiful Soup
 offense = []
 defense = []
 
@@ -31,6 +32,8 @@ def team_offense_function():
             
 team_offense_function()
 
+#Using pandas to data munge offense stats
+
 team_offense_df = pd.DataFrame(offense,columns=["generic"])
 lista_offense = [item.split(',') for item in team_offense_df["generic"]]
 lista_offense
@@ -38,6 +41,8 @@ lista_offense_df = pd.DataFrame(lista_offense,columns=["a","rank_off","Team","Ga
 lista_offense_df = lista_offense_df.drop(lista_offense_df.columns[[0, 6, 7]], axis=1)
 lista_offense_df = lista_offense_df.drop(lista_offense_df.columns[[2, 3]], axis=1)
 lista_offense_df = lista_offense_df.fillna(lista_offense_df.mean())
+
+#using pandas to data munge defense stats
 
 team_defense_df = pd.DataFrame(defense,columns=["generic"])
 lista_defense = [item.split(',') for item in team_defense_df["generic"]]
@@ -47,9 +52,15 @@ lista_defense_df = lista_defense_df.drop(lista_defense_df.columns[[0, 6, 7]], ax
 lista_defense_df = lista_defense_df.drop(lista_defense_df.columns[[2, 3]], axis=1)
 lista_defense_df = lista_defense_df.fillna(lista_defense_df.mean())
 
+
+#merging offense and defense stats together, into the offense table and handling null values
+
 full_lista_offense=pd.DataFrame(lista_offense_df.merge(lista_defense_df, on='Team', how='outer')).dropna(how="all")
 full_lista_offense["AvePPGAgainst"]=full_lista_offense["AvePPGAgainst"].fillna(value=60.9)
 full_lista_offense["AvePPG"]=full_lista_offense["AvePPG"].fillna(value=73.2)
+
+
+#bringing in RPI as another metric, from another source Fixing Duke Row (formerly Kentucky Row) due to excess columns
 
 SOS = requests.get("http://warrennolan.com/basketball/2015/rpi")
 SOS_soup = BeautifulSoup(SOS.text)
@@ -72,6 +83,8 @@ lista_SOS_df = lista_SOS_df.drop(lista_SOS_df.columns[[0,2,3,5,7,10,11]], axis=1
 
 
 full_lista_offense=pd.DataFrame(full_lista_offense.merge(lista_SOS_df, on='Team', how='outer')).dropna(how="all")
+
+"""Bracket Selections"""
 
 #Setting up each Region's Bracket
 Midwest = ["Kentucky","Hampton","Cincinnati","Purdue","West Virginia", "Buffalo","Maryland", "Valparaiso","Butler","Texas","Notre Dame",
