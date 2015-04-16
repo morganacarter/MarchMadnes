@@ -1,12 +1,10 @@
-#Libraries. Bring them in!
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-#Function to loop through and collect offensive and defensive scoring stats. Pulling from NCAA information using Beautiful Soup
+
 offense = []
 defense = []
-
 
 def team_offense_function():
     for i in range(1,6):
@@ -29,29 +27,30 @@ def team_offense_function():
         defense_soup_text = defense_soup_text.split("\n")
         
         for row in defense_soup_text:
-            defense.append([row])
+            defense.append(row)
+            
 team_offense_function()
-
-#Using pandas to data munge offense stats
 
 team_offense_df = pd.DataFrame(offense,columns=["generic"])
 lista_offense = [item.split(',') for item in team_offense_df["generic"]]
+lista_offense
 lista_offense_df = pd.DataFrame(lista_offense,columns=["a","rank_off","Team","GamesPlayed","PointsFor","AvePPG","g","h"])
-lista_offense_df = lista_offense_df.drop(lista_offense_df.columns[[0, 2, 3, 6, 7]], axis=1) 
+lista_offense_df = lista_offense_df.drop(lista_offense_df.columns[[0, 6, 7]], axis=1)
+lista_offense_df = lista_offense_df.drop(lista_offense_df.columns[[2, 3]], axis=1)
 lista_offense_df = lista_offense_df.fillna(lista_offense_df.mean())
 
-#using pandas to data munge defense stats
 team_defense_df = pd.DataFrame(defense,columns=["generic"])
 lista_defense = [item.split(',') for item in team_defense_df["generic"]]
+lista_defense
 lista_defense_df = pd.DataFrame(lista_defense,columns=["a","rank_def","Team","GamesPlayed","PointsAgainst","AvePPGAgainst","g","h"])
-lista_defense_df = lista_defense_df.drop(lista_defense_df.columns[[0,2,3, 6, 7]], axis=1) 
+lista_defense_df = lista_defense_df.drop(lista_defense_df.columns[[0, 6, 7]], axis=1)
+lista_defense_df = lista_defense_df.drop(lista_defense_df.columns[[2, 3]], axis=1)
+lista_defense_df = lista_defense_df.fillna(lista_defense_df.mean())
 
-#merging offense and defense stats together, into the offense table and handling null values
 full_lista_offense=pd.DataFrame(lista_offense_df.merge(lista_defense_df, on='Team', how='outer')).dropna(how="all")
 full_lista_offense["AvePPGAgainst"]=full_lista_offense["AvePPGAgainst"].fillna(value=60.9)
 full_lista_offense["AvePPG"]=full_lista_offense["AvePPG"].fillna(value=73.2)
 
-#bringing in RPI as another metric, from another source Fixing Kentucky Row due to excess columns
 SOS = requests.get("http://warrennolan.com/basketball/2015/rpi")
 SOS_soup = BeautifulSoup(SOS.text)
 SOS_soup_tbody = SOS_soup.tbody.get_text()
@@ -62,7 +61,7 @@ SOS_soup_tbody = SOS_soup_tbody.replace("\n",",").split(",,")
 SOS_list = []
 for row in SOS_soup_tbody:
     SOS_list.append([row])
-SOS_list[1] = [',Kentucky,34,0,1.0000,1,.6780,1,.5707,25,1,1']
+SOS_list[1] = [',Duke,35,4,.8974,5,.6818,1,.6089,3,4,1']
 
 SOS_df = pd.DataFrame(SOS_list,columns=["generic"])
 
@@ -71,7 +70,8 @@ lista_SOS_df = pd.DataFrame(SOS_new_list,columns=["blank1","Team","W","L","WinPC
 
 lista_SOS_df = lista_SOS_df.drop(lista_SOS_df.columns[[0,2,3,5,7,10,11]], axis=1) 
 
-"""Bracket Selections"""
+
+full_lista_offense=pd.DataFrame(full_lista_offense.merge(lista_SOS_df, on='Team', how='outer')).dropna(how="all")
 
 #Setting up each Region's Bracket
 Midwest = ["Kentucky","Hampton","Cincinnati","Purdue","West Virginia", "Buffalo","Maryland", "Valparaiso","Butler","Texas","Notre Dame",
@@ -85,16 +85,18 @@ East = ["Villanova","Lafayette","NC State","LSU", "UNI", "Wyoming","Louisville",
 
 South = ["Duke","Robert Morris","San Diego State", "St.John's", "Utah", "Steph.F.Austin","Georgetown","Eastern Wash.","SMU","UCLA", 
          "Iowa State", "UAB", "Iowa","Davidson","Gonzaga","North Dakota St."]
-         
+
 #Midwest Bracket Selections
 #Midwest Bracket Setup. Pulls data from stats dataframe, left joins to MW teams
 midwest_df = pd.DataFrame(Midwest, columns=["Team"])
 midwest_df = pd.DataFrame(midwest_df.merge(full_lista_offense,on='Team', how='left'))
+midwest_df
 midwest_df["AvePPGAgainst"]=midwest_df["AvePPGAgainst"].fillna(value=60.9)
 midwest_df["AvePPG"]=midwest_df["AvePPG"].fillna(value=73.2)
 midwest_df["RPI"]=midwest_df["RPI"].fillna(value=.5900)
 
 midwest = [tuple(x) for x in midwest_df.values]
+
 
 #Advances to Round of 32
 sweet_sixteen = []
@@ -147,6 +149,7 @@ for i in range(0, len(final_four), 2):
 print Regional_winner
 
 
+
 #West Bracket Selections
 #West Bracket Setup. Pulls data from stats dataframe, left joins to West teams
 
@@ -165,7 +168,7 @@ for i in range(0, len(west), 2):
     difference = (float(west[i][2])-float(west[i + 1][2]) )+(float(west[i+1][4])-float(west[i][4])) + (float(west[i][6])-float(west[i + 1][6]))
     if float(west[i][2])-float(west[i + 1][2]) +float(west[i+1][4])-float(west[i][4]) +float(west[i][6])-float(west[i + 1][6]) >0:
        sweet_sixteen.append(west[i])
-        print west[i][0] + "-higher seed wins!" + str(difference)
+       print west[i][0] + "-higher seed wins!" + str(difference)
     else:
         sweet_sixteen.append(west[i+1])
         print west[i + 1][0]+"-lower seed wins!"+ str(difference)
